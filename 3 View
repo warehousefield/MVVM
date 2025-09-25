@@ -1,0 +1,18 @@
+<Window x:Class="MyRevitPlugin.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Установка кровли" Height="200" Width="300">
+    <Grid Margin="10">
+        <StackPanel>
+            <Label Content="Выберите тип кровли:"/>
+            <ComboBox 
+                ItemsSource="{Binding RoofTypes}"
+                SelectedItem="{Binding SelectedRoofType}"
+                DisplayMemberPath="Name" />
+
+            <Button Content="Установить кровлю" 
+                    Command="{Binding InstallRoofCommand}"
+                    Margin="0,20,0,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
