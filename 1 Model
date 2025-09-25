@@ -1,0 +1,64 @@
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using System.Collections.Generic;
+using System.Linq;
+
+public class RevitService
+{
+    private readonly UIApplication _uiApp;
+
+    public RevitService(UIApplication uiApp)
+    {
+        _uiApp = uiApp;
+    }
+
+    /// <summary>
+    /// Возвращает список всех доступных типов кровли.
+    /// </summary>
+    public List<RoofType> GetRoofTypes()
+    {
+        return new FilteredElementCollector(_uiApp.ActiveUIDocument.Document)
+            .OfClass(typeof(RoofType))
+            .Cast<RoofType>()
+            .ToList();
+    }
+
+    /// <summary>
+    /// Создает кровлю с использованием заданного типа.
+    /// </summary>
+    public void CreateRoof(RoofType selectedRoofType)
+    {
+        Document doc = _uiApp.ActiveUIDocument.Document;
+        // В реальном проекте здесь будет логика получения контура кровли (линии, контур, уровень)
+        // Для примера создадим простую прямоугольную крышу
+        Level level = new FilteredElementCollector(doc)
+            .OfClass(typeof(Level))
+            .Cast<Level>()
+            .FirstOrDefault(l => l.Name == "Level 2"); // Или любой другой уровень
+
+        if (level == null)
+        {
+            TaskDialog.Show("Ошибка", "Не найден уровень для создания кровли.");
+            return;
+        }
+
+        using (Transaction t = new Transaction(doc, "Создание кровли"))
+        {
+            t.Start();
+
+            // Создаем контур для крыши
+            CurveArray curveArray = new CurveArray();
+            curveArray.Append(Line.CreateBound(new XYZ(0, 0, 0), new XYZ(20, 0, 0)));
+            curveArray.Append(Line.CreateBound(new XYZ(20, 0, 0), new XYZ(20, 20, 0)));
+            curveArray.Append(Line.CreateBound(new XYZ(20, 20, 0), new XYZ(0, 20, 0)));
+            curveArray.Append(Line.CreateBound(new XYZ(0, 20, 0), new XYZ(0, 0, 0)));
+
+            // Создаем кровлю
+            doc.Create.NewFootPrintRoof(curveArray, selectedRoofType, level, false);
+            
+            t.Commit();
+        }
+
+        TaskDialog.Show("Успех", $"Кровля типа '{selectedRoofType.Name}' успешно создана.");
+    }
+}
