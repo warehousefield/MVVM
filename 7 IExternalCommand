@@ -1,0 +1,22 @@
+using Autodesk.Revit.UI;
+using Autodesk.Revit.Attributes;
+
+[Transaction(TransactionMode.Manual)]
+public class App : IExternalCommand
+{
+    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+    {
+        // Создаем сервис для работы с Revit API
+        RevitService revitService = new RevitService(commandData.Application);
+        
+        // Создаем ViewModel, передавая ему сервис
+        MainViewModel viewModel = new MainViewModel(revitService);
+        
+        // Создаем View (окно WPF) и передаем ему ViewModel
+        MainView view = new MainView(viewModel);
+        
+        view.ShowDialog();
+        
+        return Result.Succeeded;
+    }
+}
